@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Function Pointers, Lambdas, File I/O, Error Handling</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1f2430;
+      --text: #f5f7fb;
+      --muted: #b8c0cc;
+      --accent: #ffd84d;
+      --accent-2: #7dd3fc;
+      --good: #86efac;
+      --border: #2d3442;
+      --code: #10141b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: 0 auto;
+      padding: 32px 0 60px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      color: var(--accent-2);
+      margin-bottom: 8px;
+    }
+
+    p, li {
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin: 20px 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .tip, .warning {
+      border-left: 5px solid var(--accent);
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: var(--panel-2);
+      margin: 14px 0;
+    }
+
+    .warning {
+      border-left-color: #fb7185;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    code {
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    pre {
+      background: var(--code);
+      color: #f8fafc;
+      padding: 18px;
+      border-radius: 14px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .mini-list li { margin-bottom: 8px; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 216, 77, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(255, 216, 77, 0.35);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel-2);
+      color: var(--accent);
+    }
+
+    .footer {
+      margin-top: 36px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Function Pointers, Lambdas, File I/O, Error Handling</h1>
+    <p class="subtitle">Straight-to-the-point notes on <strong>function pointers</strong>, <strong>lambda expressions</strong>, <strong>file I/O</strong>, and <strong>error handling</strong>, with simple examples and comments.</p>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="badge">Quick idea</span>
+      </div>
+      <p><strong>Function pointer</strong> = stores the address of a function.</p>
+      <p><strong>Lambda</strong> = a short unnamed function you can write directly in code.</p>
+      <p><strong>File I/O</strong> = reading from and writing to files.</p>
+      <p><strong>Error handling</strong> = detecting problems and responding safely.</p>
+    </div>
+
+    <section class="card">
+      <h2>1) Function Pointers</h2>
+      <p>A function pointer does <strong>not copy a function</strong>. It only stores the function's address, so your program can call that function later.</p>
+
+      <div class="tip">
+        <strong>Think of it like this:</strong> a normal pointer stores the address of a variable. A function pointer stores the address of a function.
+      </div>
+
+      <h3>Basic syntax</h3>
+      <pre><code>// Pointer to a function with no parameters and no return value
+void (*ptr)();
+
+// Pointer to a function with parameters
+int (*op)(int, int);</code></pre>
+
+      <h3>Example: basic function pointer</h3>
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+void hello() {
+    cout &lt;&lt; "Hello from function\n";
+}
+
+int main() {
+    void (*ptr)() = hello;   // ptr stores the address of hello
+    ptr();                   // calls hello()
+
+    return 0;
+}</code></pre>
+
+      <div class="tip">
+        <strong>Important:</strong> <code>ptr()</code> calls the function stored in <code>ptr</code>. It does not restart the whole program and it does not loop by itself.
+      </div>
+
+      <h3>Why use function pointers?</h3>
+      <ul class="mini-list">
+        <li>To choose which function to run at runtime</li>
+        <li>To pass a function into another function</li>
+        <li>To build callback systems</li>
+        <li>To create tables or menus of functions</li>
+      </ul>
+
+      <h3>Example: function pointer with arguments</h3>
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int add(int a, int b) {
+    return a + b;
+}
+
+int subtract(int a, int b) {
+    return a - b;
+}
+
+int main() {
+    int (*operation)(int, int); // pointer to a function that takes 2 ints
+
+    operation = add;
+    cout &lt;&lt; operation(8, 3) &lt;&lt; "\n";   // 11
+
+    operation = subtract;
+    cout &lt;&lt; operation(8, 3) &lt;&lt; "\n";   // 5
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>2) Array of Function Pointers</h2>
+      <p>An array of function pointers lets you store multiple functions and choose one by index. This is useful for calculators, menus, and command systems.</p>
+
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int add(int a, int b) { return a + b; }
+int sub(int a, int b) { return a - b; }
+int mul(int a, int b) { return a * b; }
+
+int main() {
+    // Array of pointers to functions
+    int (*ops[3])(int, int) = { add, sub, mul };
+
+    cout &lt;&lt; ops[0](4, 2) &lt;&lt; "\n";  // add(4, 2) = 6
+    cout &lt;&lt; ops[1](4, 2) &lt;&lt; "\n";  // sub(4, 2) = 2
+    cout &lt;&lt; ops[2](4, 2) &lt;&lt; "\n";  // mul(4, 2) = 8
+
+    return 0;
+}</code></pre>
+
+      <div class="tip">
+        This is like a list of function addresses. Each index points to a different function.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3) Callback Functions</h2>
+      <p>A callback means: one function receives another function and calls it later.</p>
+
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+void done() {
+    cout &lt;&lt; "Task finished!\n";
+}
+
+void process(void (*callback)()) {
+    cout &lt;&lt; "Processing...\n";
+    callback();   // call the function passed in
+}
+
+int main() {
+    process(done);
+    return 0;
+}</code></pre>
+
+      <h3>What happens step by step?</h3>
+      <ol>
+        <li><code>main()</code> calls <code>process(done)</code></li>
+        <li><code>process()</code> prints <code>Processing...</code></li>
+        <li><code>callback()</code> actually means <code>done()</code></li>
+        <li><code>done()</code> runs once</li>
+      </ol>
+
+      <div class="warning">
+        <strong>Common confusion:</strong> <code>callback()</code> does <strong>not</strong> make <code>process()</code> run again. It only runs the function stored in <code>callback</code>.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4) Lambda Expressions</h2>
+      <p>A lambda is a short anonymous function. You usually use it when you need a function only once, especially with STL algorithms.</p>
+
+      <h3>General syntax</h3>
+      <pre><code>[capture](parameters) -&gt; return_type {
+    // function body
+};</code></pre>
+
+      <h3>Simple example</h3>
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    auto greet = []() {
+        cout &lt;&lt; "Hello from lambda\n";
+    };
+
+    greet();
+    return 0;
+}</code></pre>
+
+      <h3>Lambda with parameters</h3>
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    auto square = [](int x) {
+        return x * x;
+    };
+
+    cout &lt;&lt; square(5) &lt;&lt; "\n";   // 25
+    return 0;
+}</code></pre>
+
+      <h3>Capture list</h3>
+      <p>The capture list tells the lambda which outside variables it can use.</p>
+
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int a = 10;
+    int b = 20;
+
+    auto show = [a, &amp;b]() {
+        // a is captured by value: lambda gets a copy
+        // b is captured by reference: lambda can change the original b
+        cout &lt;&lt; "a = " &lt;&lt; a &lt;&lt; ", b = " &lt;&lt; b &lt;&lt; "\n";
+    };
+
+    show();
+    return 0;
+}</code></pre>
+
+      <table>
+        <tr>
+          <th>Capture</th>
+          <th>Meaning</th>
+        </tr>
+        <tr>
+          <td><code>[]</code></td>
+          <td>Capture nothing</td>
+        </tr>
+        <tr>
+          <td><code>[=]</code></td>
+          <td>Capture everything by value</td>
+        </tr>
+        <tr>
+          <td><code>[&amp;]</code></td>
+          <td>Capture everything by reference</td>
+        </tr>
+        <tr>
+          <td><code>[x]</code></td>
+          <td>Capture only <code>x</code> by value</td>
+        </tr>
+        <tr>
+          <td><code>[&amp;x]</code></td>
+          <td>Capture only <code>x</code> by reference</td>
+        </tr>
+      </table>
+
+      <h3>Lambda with STL</h3>
+      <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; nums = {4, 1, 7, 2};
+
+    sort(nums.begin(), nums.end(), [](int a, int b) {
+        return a &lt; b;   // sort in ascending order
+    });
+
+    for (int x : nums) {
+        cout &lt;&lt; x &lt;&lt; " ";
+    }
+    return 0;
+}</code></pre>
+
+      <div class="tip">
+        Use lambdas when the function is short and only needed in one place.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5) File I/O</h2>
+      <p>File I/O means saving data to a file or reading data from a file.</p>
+
+      <div class="grid">
+        <div>
+          <h3>Common classes</h3>
+          <ul class="mini-list">
+            <li><code>ofstream</code> = output to file</li>
+            <li><code>ifstream</code> = input from file</li>
+            <li><code>fstream</code> = input and output</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Need this header</h3>
+          <pre><code>#include &lt;fstream&gt;</code></pre>
+        </div>
+      </div>
+
+      <h3>Write to a file</h3>
+      <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream fout("data.txt");
+
+    if (fout.is_open()) {
+        fout &lt;&lt; "Tom\n";
+        fout &lt;&lt; 95 &lt;&lt; "\n";
+        fout.close();
+        cout &lt;&lt; "File written successfully\n";
+    }
+    else {
+        cout &lt;&lt; "Could not open file for writing\n";
+    }
+
+    return 0;
+}</code></pre>
+
+      <h3>Read from a file</h3>
+      <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream fin("data.txt");
+    string name;
+    int mark;
+
+    if (fin.is_open()) {
+        getline(fin, name);  // read a whole line
+        fin &gt;&gt; mark;         // read an integer
+
+        cout &lt;&lt; "Name: " &lt;&lt; name &lt;&lt; "\n";
+        cout &lt;&lt; "Mark: " &lt;&lt; mark &lt;&lt; "\n";
+
+        fin.close();
+    }
+    else {
+        cout &lt;&lt; "Could not open file for reading\n";
+    }
+
+    return 0;
+}</code></pre>
+
+      <h3>Useful file functions</h3>
+      <ul class="mini-list">
+        <li><code>is_open()</code> checks if the file opened properly</li>
+        <li><code>close()</code> closes the file</li>
+        <li><code>getline()</code> reads a full line</li>
+        <li><code>&gt;&gt;</code> reads formatted data like int, double, string</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>6) Error Handling</h2>
+      <p>Error handling means checking for problems and preventing the program from crashing or producing wrong results.</p>
+
+      <h3>Type 1: Simple checking with if</h3>
+      <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int divide(int a, int b) {
+    if (b == 0) {
+        cout &lt;&lt; "Error: division by zero\n";
+        return 0;
+    }
+    return a / b;
+}
+
+int main() {
+    cout &lt;&lt; divide(10, 2) &lt;&lt; "\n";
+    cout &lt;&lt; divide(10, 0) &lt;&lt; "\n";
+    return 0;
+}</code></pre>
+
+      <h3>Type 2: Exceptions</h3>
+      <p>Exceptions are useful when an error is serious and you want to handle it separately.</p>
+
+      <pre><code>#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+using namespace std;
+
+int divide(int a, int b) {
+    if (b == 0) {
+        throw runtime_error("division by zero");
+    }
+    return a / b;
+}
+
+int main() {
+    try {
+        cout &lt;&lt; divide(10, 0) &lt;&lt; "\n";
+    }
+    catch (const exception&amp; e) {
+        cout &lt;&lt; "Caught error: " &lt;&lt; e.what() &lt;&lt; "\n";
+    }
+
+    return 0;
+}</code></pre>
+
+      <h3>Keywords</h3>
+      <ul class="mini-list">
+        <li><code>try</code> = code that might cause an error</li>
+        <li><code>throw</code> = sends an exception</li>
+        <li><code>catch</code> = handles the exception</li>
+      </ul>
+
+      <div class="tip">
+        In school exercises, first use simple <code>if</code> checks when possible. Use exceptions when your teacher expects more formal error handling.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>7) Quick Comparison</h2>
+      <table>
+        <tr>
+          <th>Topic</th>
+          <th>Main Idea</th>
+          <th>Best Use</th>
+        </tr>
+        <tr>
+          <td>Function Pointer</td>
+          <td>Stores function address</td>
+          <td>Callbacks, runtime selection, arrays of functions</td>
+        </tr>
+        <tr>
+          <td>Lambda</td>
+          <td>Short unnamed function</td>
+          <td>STL algorithms, quick local logic</td>
+        </tr>
+        <tr>
+          <td>File I/O</td>
+          <td>Read and write files</td>
+          <td>Saving and loading program data</td>
+        </tr>
+        <tr>
+          <td>Error Handling</td>
+          <td>Detect and respond to problems</td>
+          <td>Input checks, file checks, exceptions</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>8) What to Remember for Class</h2>
+      <ul class="mini-list">
+        <li>A function pointer stores an address, not a copy of the function.</li>
+        <li><code>callback()</code> calls the passed function once. It does not repeat by itself.</li>
+        <li>An array of function pointers is useful when you want multiple selectable actions.</li>
+        <li>Lambdas are great for short code, especially with STL.</li>
+        <li>Always check if a file opened successfully.</li>
+        <li>Use <code>if</code> checks and exceptions to handle errors safely.</li>
+      </ul>
+    </section>
+
+    <p class="footer">Made as a clean review page for your OOP study notes.</p>
+  </div>
+</body>
+</html>
